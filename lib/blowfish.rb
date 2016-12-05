@@ -3,7 +3,7 @@ require 'mcrypt'
 class Blowfish
   def initialize(key)
     @key = key
-    @crypto = Mcrypt.new(:blowfish, :ecb, key, nil, true)
+    @crypto = Mcrypt.new(:blowfish, :ecb, key)
   end
 
   def encrypt(data, encoding_type = 'utf-8')
