@@ -54,13 +54,13 @@ module PayGreen
 
       attributes.map { |x| @data[x.to_s.delete('@')] = instance_variable_get x.to_s }
       text = JSON.generate(@data).encode('utf-8')
-      blowfish = Spree::Blowfish.new(@key)
+      blowfish = Blowfish.new(@key)
       encrypted_block = blowfish.encrypt(text)
       Base64.encode64(encrypted_block).strip
     end
 
     def parse_data(post)
-      blowfish = Spree::Blowfish.new(@key)
+      blowfish = Blowfish.new(@key)
       text = blowfish.decrypt(Base64.decode64(post)).strip
       @data = JSON.parse(text)
     end
