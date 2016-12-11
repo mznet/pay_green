@@ -47,7 +47,7 @@ module PayGreen
     end
 
     def set_token(shop_token)
-      token_with_time = "#{DateTime.current.to_i}:#{shop_token}"
+      token_with_time = "#{DateTime.now.to_time.to_i}:#{shop_token}"
       @token = Base64.strict_encode64(token_with_time)
     end
 
