@@ -43,6 +43,7 @@ module PayGreen
     end
 
     def private_key(encrypt_key)
+      encrypt_key = encrypt_key.to_s if encrypt_key.is_a? Integer
       @key = encrypt_key
     end
 
