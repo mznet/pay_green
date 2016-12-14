@@ -98,7 +98,7 @@ module PayGreen
       text = JSON.generate(@data).encode('utf-8')
       blowfish = ::Blowfish.new(@key)
       encrypted_block = blowfish.encrypt(text)
-      Base64.encode64(encrypted_block).strip
+      Base64.strict_encode64(encrypted_block).strip
     end
 
     def parse_data(post)

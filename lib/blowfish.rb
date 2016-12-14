@@ -4,7 +4,11 @@ class Blowfish
   def initialize(key)
     @key = key
     @crypto = Mcrypt.new(:blowfish, :ecb, key)
-    @crypto.padding = true
+    @crypto.padding = :zeros
+  end
+
+  def padding=(padding)
+    @crypto = padding
   end
 
   def encrypt(data, encoding_type = 'utf-8')
