@@ -136,5 +136,44 @@ module PayGreen
     def card_print
       @mode = MODE_TOKENIZE
     end
+
+    def shipping_to(last_name, first_name, address, address2, company, zip_code, city, country = 'FR')
+      @shipping_to_last_name = last_name.nil? ? @customer_last_name : last_name
+      @shipping_to_first_name = first_name.nil? ? @customer_first_name : first_name
+      @shipping_to_address = address
+      @shipping_to_address2 = address2
+      @shipping_to_company = company
+      @shipping_to_zipcode = zip_code
+      @shipping_to_city = city
+      @shipping_to_country = country
+    end
+
+    def additional_transaction(amount)
+      if @mode == MODE_RECURRING
+        @additional_transaction = amount
+      else
+        raise 'This function can only be used with a reccurence transaction'
+      end
+
+      self
+    end
+
+    def subscribtion_payment(recurring_mode = nil, due_count = nil, transaction_day - 1, start_at = nil)
+      @mode = MODE_RECURRING
+      unless recurring_mode.nil?
+        @recurring_mode = recurring_mode
+        @recurring_due_count = due_count
+        @recurring_transaction_day = transaction_day
+        @recurring_start_at = start_at
+      end
+
+      self
+    end
+
+    def subscription_first_amount(first_amount, first_amount_date = nil)
+      @recurring_first_amount = first_amount
+      @recurring_first_amount_date = first_amount_date
+    end
+
   end
 end
