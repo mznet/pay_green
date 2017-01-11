@@ -23,17 +23,28 @@ module PayGreen
     MODE_RECURRING = 'RECURRING'
     MODE_TOKENIZE = 'TOKENIZE'
 
-    STATUS_WAITING = "WAITING";
-    STATUS_PENDING = "PENDING";
-    STATUS_EXPIRED = 'EXPIRED';
-    STATUS_PENDING_EXEC = "PENDING_EXEC";
-    STATUS_WAITING_EXEC = "WAITING_EXEC";
-    STATUS_CANCELLING = "CANCELLED";
-    STATUS_REFUSED = "REFUSED";
-    STATUS_SUCCESSED = "SUCCESSED";
-    STATUS_RESETED = "RESETED";
-    STATUS_REFUNDED = "REFUNDED";
-    STATUS_FAILED = "FAILED";
+    STATUS_WAITING = "WAITING"
+    STATUS_PENDING = "PENDING"
+    STATUS_EXPIRED = 'EXPIRED'
+    STATUS_PENDING_EXEC = "PENDING_EXEC"
+    STATUS_WAITING_EXEC = "WAITING_EXEC"
+    STATUS_CANCELLING = "CANCELLED"
+    STATUS_REFUSED = "REFUSED"
+    STATUS_SUCCESSED = "SUCCESSED"
+    STATUS_RESETED = "RESETED"
+    STATUS_REFUNDED = "REFUNDED"
+    STATUS_FAILED = "FAILED"
+
+    RECURRING_DAILY = 10
+    RECURRING_WEEKLY = 20
+    RECURRING_SEMI_MONTHLY = 30
+    RECURRING_MONTHLY = 40
+    RECURRING_BIMONTHLY = 50
+    RECURRING_QUARTERLY = 60
+    RECURRING_SEMI_ANNUAL = 70
+    RECURRING_ANNUAL = 80
+    RECURRING_BIANNUAL = 90
+
 
     def initialize(encrypt_key, root_url = nil)
       @key = encrypt_key
@@ -63,14 +74,6 @@ module PayGreen
       @customer_first_name = first_name
       @customer_email = email
       @customer_country = country
-      self
-    end
-
-    def transaction(transaction_id, amount, currency = CURRENCY_EUR)
-      @transaction_id = transaction_id
-      @mode = MODE_CASH
-      @amount = amount
-      @currency = currency
       self
     end
 
@@ -128,6 +131,14 @@ module PayGreen
       @data['result']['status'] == STATUS_SUCCESSED
     end
 
+    def transaction(transaction_id, amount, currency = CURRENCY_EUR)
+      @transaction_id = transaction_id
+      @mode = MODE_CASH
+      @amount = amount
+      @currency = currency
+      self
+    end
+
     # Immediate Payment
     def immediate_paiement(transaction_id, amount, currency = CURRENCY_EUR)
       transaction(transaction_id, amount, currency)
@@ -135,17 +146,6 @@ module PayGreen
 
     def card_print
       @mode = MODE_TOKENIZE
-    end
-
-    def shipping_to(last_name, first_name, address, address2, company, zip_code, city, country = 'FR')
-      @shipping_to_last_name = last_name.nil? ? @customer_last_name : last_name
-      @shipping_to_first_name = first_name.nil? ? @customer_first_name : first_name
-      @shipping_to_address = address
-      @shipping_to_address2 = address2
-      @shipping_to_company = company
-      @shipping_to_zipcode = zip_code
-      @shipping_to_city = city
-      @shipping_to_country = country
     end
 
     def additional_transaction(amount)
@@ -175,5 +175,52 @@ module PayGreen
       @recurring_first_amount_date = first_amount_date
     end
 
+    def x_time_payment(nb_payment, report_payment = nil)
+      amount = @amount
+      currency = @currency
+
+      if nb_payment > 1
+        occurence_amount = (amount / nb_payment).floor
+        first_amount = amount - ( occurence_amount * (nb_payment - 1))
+
+        date_report_payment = report_payment.nil? ? nil : Time.parse(report_payment).to_i
+
+        subscribtion_payment(
+          RECURRING_MONTLY,
+          nb_payment,
+          Time.new.day,
+          date_report_payment
+        )
+
+        subscribtion_payment(first_amount) if occurence_amount != first_amount
+      end
+    end
+
+    def shipping_to(last_name, first_name, address, address2, company, zip_code, city, country = 'FR')
+      @shipping_to_last_name = last_name.nil? ? @customer_last_name : last_name
+      @shipping_to_first_name = first_name.nil? ? @customer_first_name : first_name
+      @shipping_to_address = address
+      @shipping_to_address2 = address2
+      @shipping_to_company = company
+      @shipping_to_zipcode = zip_code
+      @shipping_to_city = city
+      @shipping_to_country = country
+    end
+
+    def push_cart_item(id_item, label, qt, price_ttc, price_ht = nil, vat_value = nil, category_code = nil)
+      if @data['cart_items'].nil?
+        @data['cart_items'] = {}
+      end
+
+      @data['cart_items'] = {
+        item_code: id_item,
+        label: label,
+        quantity: qt,
+        price_ht: price_ht,
+        price_ttc: price_ttc,
+        vat: vat_value,
+        category_code: category_code
+      }
+    end
   end
 end
